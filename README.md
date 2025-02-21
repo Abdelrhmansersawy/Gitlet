@@ -17,7 +17,7 @@ gitlet/
 
 # TODO (Refactoring)  
 I am currently refactoring this project by utilizing design patterns, design principles, and Java Streams.  
-- [ ] Refactor initialization features.  
+- [x] Refactor initialization features.  
 - [ ] Refactor the item addition feature.  
 - [ ] Refactor the item removal feature.  
 - [ ] Refactor commit functionality.  
