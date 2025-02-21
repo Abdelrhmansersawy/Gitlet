@@ -13,3 +13,20 @@ gitlet/
 ├── refs/ # References to commits in the repository
 │ ├── heads/ # Branch references (e.g., master, feature-branch)
 ```
+
+
+# TODO (Refactoring)  
+I am currently refactoring this project by utilizing design patterns, design principles, and Java Streams.  
+- [ ] Refactor initialization features.  
+- [ ] Refactor the item addition feature.  
+- [ ] Refactor the item removal feature.  
+- [ ] Refactor commit functionality.  
+- [ ] Refactor global log functionality.  
+- [ ] Refactor log functionality.  
+- [ ] Refactor find functionality.  
+- [ ] Refactor status functionality.  
+- [ ] Refactor checkout functionality.  
+- [ ] Refactor branch management.  
+- [ ] Refactor branch removal functionality.  
+- [ ] Refactor reset functionality.  
+- [ ] Refactor merge functionality.  
