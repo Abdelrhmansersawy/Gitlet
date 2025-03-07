@@ -145,4 +145,3 @@ Gitlet differs from Git by:
   Merges another branch into the current branch.
 
 
-

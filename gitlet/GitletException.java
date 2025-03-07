@@ -4,7 +4,7 @@ package gitlet;
  *  result of .getMessage() is the error message to be printed.
  *  @author P. N. Hilfinger
  */
-class GitletException extends RuntimeException {
+public class GitletException extends RuntimeException {
 
 
     /** A GitletException with no message. */
@@ -13,7 +13,7 @@ class GitletException extends RuntimeException {
     }
 
     /** A GitletException MSG as its message. */
-    GitletException(String msg) {
+    public GitletException(String msg) {
         super(msg);
     }
 
