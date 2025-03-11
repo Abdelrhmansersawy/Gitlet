@@ -1,64 +1,80 @@
 package gitlet;
 
-import gitlet.entity.Repository;
-import gitlet.entity.StagingArea;
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
  *  @author TODO
  */
 public class Main {
 
-    /** Usage: java gitlet.Main ARGS, where ARGS contains
-     *  <COMMAND> <OPERAND1> <OPERAND2> ... 
-     */
-
     public static void main(String[] args) {
-        Repository repo = Repository.getInstance();
-        StagingArea stagingArea = StagingArea.getInstance();
+        if(args.length == 0){
+            // TODO: what if args is empty?
 
+            return;
+        }
+        // TODO: check if the git is already initialized deserializing the head object.
+        Repository repository = new Repository();
+        if(FileSystem.checkGit()){
+            // The Git version control system is already initialized
+            repository = new Repository().read();
+        }
 
-        // TODO: what if args is empty?
         String firstArg = args[0];
         switch(firstArg) {
             case "init":
-                repo.init();
+                // TODO: handle the `init` command
+                if(FileSystem.checkGit()){
+                    System.out.println("A Gitlet version-control system already exists in the current directory.");
+                    return;
+                }
+                FileSystem.initGit();
+                repository = new Repository(new Commit());
+                break;
             case "add":
-//                repo.add(args[1]);
+                repository.add(args[1]);
+                // TODO: handle the `add [filename]` command
                 break;
             case "rm":
+                repository.rm(args[1]);
                 break;
             case "commit":
-                // TODO: FILL THE REST IN
+                repository.commit(args[1]);
+            // TODO: FILL THE REST IN
                 break;
             case "global-log":
+                repository.getGlobalLogs();
                 break;
             case "log":
+                repository.getLogs();
                 break;
             case "find":
+                repository.find(args[1]);
                 break;
             case "status":
+                repository.status();
                 break;
             case "checkout":
                 if(args.length == 3){
-//                    repo.checkoutFile(args[2]); // java gitlet.Main checkout -- [file name]
+                    repository.checkoutFile(args[2]); // java gitlet.Main checkout -- [file name]
                 }else if(args.length == 4){
-//                    repo.checkoutFile(args[3] , args[1]); // java gitlet.Main checkout [commit id] -- [file name]
+                    repository.checkoutFile(args[3] , args[1]); // java gitlet.Main checkout [commit id] -- [file name]
                 }else if(args.length == 2){
-//                    repo.checkoutBranch(args[1]); //  java gitlet.Main checkout [branch name]
+                    repository.checkoutBranch(args[1]); //  java gitlet.Main checkout [branch name]
                 }
                 break;
             case "branch":
-//                repo.createNewBranch(args[1]);
+                repository.createNewBranch(args[1]);
                 break;
             case "rm-branch":
-//                repo.removeBranch(args[1]);
+                repository.removeBranch(args[1]);
                 break;
             case "reset":
-//                repo.reset(args[1]);
+                repository.reset(args[1]);
                 break;
             case "merge":
-//                repo.merge(args[1]);
+                repository.merge(args[1]);
                 break;
         }
+        repository.write();
     }
 }

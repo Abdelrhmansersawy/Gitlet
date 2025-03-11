@@ -18,28 +18,24 @@ import java.util.Arrays;
 import java.util.Formatter;
 import java.util.List;
 
-/**
- * Assorted utilities for Gitlet.
- * This class provides several useful utility functions to simplify common tasks.
+
+/** Assorted utilities.
  *
- * @author P. N. Hilfinger
+ * Give this file a good read as it provides several useful utility functions
+ * to save you some time.
+ *
+ *  @author P. N. Hilfinger
  */
-public class Utils {
+class Utils {
 
     /** The length of a complete SHA-1 UID as a hexadecimal numeral. */
-    public static final int UID_LENGTH = 40;
+    static final int UID_LENGTH = 40;
 
-    /* SHA-1 HASH VALUES */
+    /* SHA-1 HASH VALUES. */
 
-    /**
-     * Returns the SHA-1 hash of the concatenation of the given values.
-     * The values can be any mixture of byte arrays and Strings.
-     *
-     * @param vals The values to hash.
-     * @return The SHA-1 hash as a hexadecimal string.
-     * @throws IllegalArgumentException If the system does not support SHA-1 or if the input type is invalid.
-     */
-    public static String sha1(Object... vals) {
+    /** Returns the SHA-1 hash of the concatenation of VALS, which may
+     *  be any mixture of byte arrays and Strings. */
+    static String sha1(Object... vals) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-1");
             for (Object val : vals) {
@@ -48,7 +44,7 @@ public class Utils {
                 } else if (val instanceof String) {
                     md.update(((String) val).getBytes(StandardCharsets.UTF_8));
                 } else {
-                    throw new IllegalArgumentException("Invalid type for SHA-1 hashing.");
+                    throw new IllegalArgumentException("improper type to sha1");
                 }
             }
             Formatter result = new Formatter();
@@ -56,238 +52,187 @@ public class Utils {
                 result.format("%02x", b);
             }
             return result.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException("System does not support SHA-1.");
+        } catch (NoSuchAlgorithmException excp) {
+            throw new IllegalArgumentException("System does not support SHA-1");
         }
     }
 
-    /**
-     * Returns the SHA-1 hash of the concatenation of the strings in the given list.
-     *
-     * @param vals The list of values to hash.
-     * @return The SHA-1 hash as a hexadecimal string.
-     */
-    public static String sha1(List<Object> vals) {
-        return sha1(vals.toArray(new Object[0]));
+    /** Returns the SHA-1 hash of the concatenation of the strings in
+     *  VALS. */
+    static String sha1(List<Object> vals) {
+        return sha1(vals.toArray(new Object[vals.size()]));
     }
 
     /* FILE DELETION */
 
-    /**
-     * Deletes the specified file if it exists and is not a directory.
-     * Throws an IllegalArgumentException unless the parent directory contains a `.gitlet` directory.
-     *
-     * @param file The file to delete.
-     * @return True if the file was deleted, false otherwise.
-     * @throws IllegalArgumentException If the file is not in a Gitlet working directory.
-     */
-    public static boolean restrictedDelete(File file) {
+    /** Deletes FILE if it exists and is not a directory.  Returns true
+     *  if FILE was deleted, and false otherwise.  Refuses to delete FILE
+     *  and throws IllegalArgumentException unless the directory designated by
+     *  FILE also contains a directory named .gitlet. */
+    static boolean restrictedDelete(File file) {
         if (!(new File(file.getParentFile(), ".gitlet")).isDirectory()) {
-            throw new IllegalArgumentException("Not a Gitlet working directory.");
+            throw new IllegalArgumentException("not .gitlet working directory");
         }
         if (!file.isDirectory()) {
             return file.delete();
+        } else {
+            return false;
         }
-        return false;
     }
 
-    /**
-     * Deletes the file with the specified name if it exists and is not a directory.
-     * Throws an IllegalArgumentException unless the parent directory contains a `.gitlet` directory.
-     *
-     * @param file The name of the file to delete.
-     * @return True if the file was deleted, false otherwise.
-     * @throws IllegalArgumentException If the file is not in a Gitlet working directory.
-     */
-    public static boolean restrictedDelete(String file) {
+    /** Deletes the file named FILE if it exists and is not a directory.
+     *  Returns true if FILE was deleted, and false otherwise.  Refuses
+     *  to delete FILE and throws IllegalArgumentException unless the
+     *  directory designated by FILE also contains a directory named .gitlet. */
+    static boolean restrictedDelete(String file) {
         return restrictedDelete(new File(file));
     }
 
     /* READING AND WRITING FILE CONTENTS */
 
-    /**
-     * Returns the entire contents of the specified file as a byte array.
-     * The file must be a normal file (not a directory).
-     *
-     * @param file The file to read.
-     * @return The contents of the file as a byte array.
-     * @throws IllegalArgumentException If the file is not a normal file or cannot be read.
-     */
-    public static byte[] readContents(File file) {
+    /** Return the entire contents of FILE as a byte array.  FILE must
+     *  be a normal file.  Throws IllegalArgumentException
+     *  in case of problems. */
+    static byte[] readContents(File file) {
         if (!file.isFile()) {
-            throw new IllegalArgumentException("File must be a normal file.");
+            throw new IllegalArgumentException("must be a normal file");
         }
         try {
             return Files.readAllBytes(file.toPath());
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Failed to read file contents: " + e.getMessage());
+        } catch (IOException excp) {
+            throw new IllegalArgumentException(excp.getMessage());
         }
     }
 
-    /**
-     * Returns the entire contents of the specified file as a String.
-     * The file must be a normal file (not a directory).
-     *
-     * @param file The file to read.
-     * @return The contents of the file as a String.
-     * @throws IllegalArgumentException If the file is not a normal file or cannot be read.
-     */
-    public static String readContentsAsString(File file) {
+    /** Return the entire contents of FILE as a String.  FILE must
+     *  be a normal file.  Throws IllegalArgumentException
+     *  in case of problems. */
+    static String readContentsAsString(File file) {
         return new String(readContents(file), StandardCharsets.UTF_8);
     }
 
-    /**
-     * Writes the concatenation of the given contents to the specified file.
-     * Each object in the contents can be either a String or a byte array.
-     *
-     * @param file The file to write to.
-     * @param contents The contents to write.
-     * @throws IllegalArgumentException If the file is a directory or if writing fails.
-     */
-    public static void writeContents(File file, Object... contents) {
+    /** Write the result of concatenating the bytes in CONTENTS to FILE,
+     *  creating or overwriting it as needed.  Each object in CONTENTS may be
+     *  either a String or a byte array.  Throws IllegalArgumentException
+     *  in case of problems. */
+    static void writeContents(File file, Object... contents) {
         try {
             if (file.isDirectory()) {
-                throw new IllegalArgumentException("Cannot overwrite a directory.");
+                throw
+                    new IllegalArgumentException("cannot overwrite directory");
             }
-            BufferedOutputStream stream = new BufferedOutputStream(Files.newOutputStream(file.toPath()));
+            BufferedOutputStream str =
+                new BufferedOutputStream(Files.newOutputStream(file.toPath()));
             for (Object obj : contents) {
                 if (obj instanceof byte[]) {
-                    stream.write((byte[]) obj);
+                    str.write((byte[]) obj);
                 } else {
-                    stream.write(((String) obj).getBytes(StandardCharsets.UTF_8));
+                    str.write(((String) obj).getBytes(StandardCharsets.UTF_8));
                 }
             }
-            stream.close();
-        } catch (IOException | ClassCastException e) {
-            throw new IllegalArgumentException("Failed to write file contents: " + e.getMessage());
+            str.close();
+        } catch (IOException | ClassCastException excp) {
+            throw new IllegalArgumentException(excp.getMessage());
         }
     }
 
-    /**
-     * Reads an object of the specified type from the given file.
-     *
-     * @param file The file to read from.
-     * @param expectedClass The expected class of the object.
-     * @param <T> The type of the object.
-     * @return The deserialized object.
-     * @throws IllegalArgumentException If the file cannot be read or the object cannot be deserialized.
-     */
-    public static <T extends Serializable> T readObject(File file, Class<T> expectedClass) {
+    /** Return an object of type T read from FILE, casting it to EXPECTEDCLASS.
+     *  Throws IllegalArgumentException in case of problems. */
+    static <T extends Serializable> T readObject(File file,
+                                                 Class<T> expectedClass) {
         try {
-            ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
+            ObjectInputStream in =
+                new ObjectInputStream(new FileInputStream(file));
             T result = expectedClass.cast(in.readObject());
             in.close();
             return result;
-        } catch (IOException | ClassCastException | ClassNotFoundException e) {
-            throw new IllegalArgumentException("Failed to read object from file: " + e.getMessage());
+        } catch (IOException | ClassCastException
+                 | ClassNotFoundException excp) {
+            throw new IllegalArgumentException(excp.getMessage());
         }
     }
 
-    /**
-     * Writes the specified serializable object to the given file.
-     *
-     * @param file The file to write to.
-     * @param obj The object to serialize and write.
-     */
-    public static void writeObject(File file, Serializable obj) {
+    /** Write OBJ to FILE. */
+    static void writeObject(File file, Serializable obj) {
         writeContents(file, serialize(obj));
     }
 
     /* DIRECTORIES */
 
-    /** A filename filter that only accepts plain files (not directories). */
-    private static final FilenameFilter PLAIN_FILES = (dir, name) -> new File(dir, name).isFile();
+    /** Filter out all but plain files. */
+    private static final FilenameFilter PLAIN_FILES =
+        new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return new File(dir, name).isFile();
+            }
+        };
 
-    /**
-     * Returns a list of the names of all plain files in the specified directory, sorted lexicographically.
-     *
-     * @param dir The directory to list files from.
-     * @return A list of filenames, or null if the directory does not exist.
-     */
-    public static List<String> plainFilenamesIn(File dir) {
+    /** Returns a list of the names of all plain files in the directory DIR, in
+     *  lexicographic order as Java Strings.  Returns null if DIR does
+     *  not denote a directory. */
+    static List<String> plainFilenamesIn(File dir) {
         String[] files = dir.list(PLAIN_FILES);
         if (files == null) {
             return null;
+        } else {
+            Arrays.sort(files);
+            return Arrays.asList(files);
         }
-        Arrays.sort(files);
-        return Arrays.asList(files);
     }
 
-    /**
-     * Returns a list of the names of all plain files in the specified directory, sorted lexicographically.
-     *
-     * @param dir The path to the directory to list files from.
-     * @return A list of filenames, or null if the directory does not exist.
-     */
-    public static List<String> plainFilenamesIn(String dir) {
+    /** Returns a list of the names of all plain files in the directory DIR, in
+     *  lexicographic order as Java Strings.  Returns null if DIR does
+     *  not denote a directory. */
+    static List<String> plainFilenamesIn(String dir) {
         return plainFilenamesIn(new File(dir));
     }
 
     /* OTHER FILE UTILITIES */
 
-    /**
-     * Joins the given path components into a single File object.
-     *
-     * @param first The first path component.
-     * @param others The remaining path components.
-     * @return The resulting File object.
-     */
-    public static File join(String first, String... others) {
+    /** Return the concatentation of FIRST and OTHERS into a File designator,
+     *  analogous to the {link java.nio.file.Paths.#get(String, String[])}
+     *  method. */
+    static File join(String first, String... others) {
         return Paths.get(first, others).toFile();
     }
 
-    /**
-     * Joins the given path components into a single File object.
-     *
-     * @param first The first path component.
-     * @param others The remaining path components.
-     * @return The resulting File object.
-     */
-    public static File join(File first, String... others) {
+    /** Return the concatentation of FIRST and OTHERS into a File designator,
+     *  analogous to the {link java.nio.file.Paths.#get(String, String[])}
+     *  method. */
+    static File join(File first, String... others) {
         return Paths.get(first.getPath(), others).toFile();
     }
 
+
     /* SERIALIZATION UTILITIES */
 
-    /**
-     * Serializes the given object into a byte array.
-     *
-     * @param obj The object to serialize.
-     * @return The serialized byte array.
-     * @throws IllegalArgumentException If serialization fails.
-     */
-    public static byte[] serialize(Serializable obj) {
+    /** Returns a byte array containing the serialized contents of OBJ. */
+    static byte[] serialize(Serializable obj) {
         try {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             ObjectOutputStream objectStream = new ObjectOutputStream(stream);
             objectStream.writeObject(obj);
             objectStream.close();
             return stream.toByteArray();
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Failed to serialize object: " + e.getMessage());
+        } catch (IOException excp) {
+            throw error("Internal error serializing commit.");
         }
     }
 
+
+
     /* MESSAGES AND ERROR REPORTING */
 
-    /**
-     * Creates a GitletException with a formatted message.
-     *
-     * @param msg The message format.
-     * @param args The arguments for the message format.
-     * @return A new GitletException.
-     */
-    public static GitletException error(String msg, Object... args) {
+    /** Return a GitletException whose message is composed from MSG and ARGS as
+     *  for the String.format method. */
+    static GitletException error(String msg, Object... args) {
         return new GitletException(String.format(msg, args));
     }
 
-    /**
-     * Prints a formatted message followed by a newline.
-     *
-     * @param msg The message format.
-     * @param args The arguments for the message format.
-     */
-    public static void message(String msg, Object... args) {
+    /** Print a message composed from MSG and ARGS as for the String.format
+     *  method, followed by a newline. */
+    static void message(String msg, Object... args) {
         System.out.printf(msg, args);
         System.out.println();
     }
