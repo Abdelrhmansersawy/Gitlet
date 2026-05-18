@@ -5,6 +5,9 @@
 - A terminal or command prompt to execute commands
 - Sufficient permissions to create and modify files in the project directory
 
+## Comming Idea
+- [ ] Add Git GUI inspired by GitButler
+
 ## How to Run
 1. **Compile the Java files:**
    ```sh
